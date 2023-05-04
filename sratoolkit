@@ -1,0 +1,63 @@
+# 1. DESCARGAR SECUENCIAS  
+
+##1.1 Instalar SRA Toolkit 
+Las secuencias que se requieren son del trabajo de Dong et al., 2022. Estan en SRA con el ID BioProject **PRJNA778934**.
+Esta parte se puede realizar de varias formas, pero la forma relativamente simple es hacerlo mediante la terminal y con ayuda de un kit llamado 'SRA Toolkit' https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit y https://blogs.iu.edu/ncgas/2021/02/22/a-beginners-guide-to-the-sra/ 
+
+En el primer link se encuentran los enlaces de descarga para los diferentes sistemas operativos, en el caso de este trabajo se realizo en una Mac OS X, una vez descragado hay que extraer el archivo tar:
+
+`````
+tar -vxzf sratoolkit.tar.gz
+`````
+Despues hay que agregar una ruta a los archivos binarios mediante:
+
+`````
+export PATH=$PATH:$PWD/sratoolkit.3.0.0-mac64/bin
+`````
+Y verificar que la terminal encuentre los archivos 
+
+`````
+which fastq-dump
+``````
+
+## 1.2 Descargar y convertir secuencias
+Una vez que ya tenemos instalado el kit, se pueden descargar las secuencias con su numero de acceso que empieza con 'SRR' sino, no lo va a correr. El cual lo va a descargar en formati '.SRA.cache' o formato '.sra'
+
+```
+prefetch SRR3900953
+```
+
+Como no lo tenemos en un formato que se pueda leer, hay que convertirlo a formato '.fastq', esto mediante este comando. OJO, todo esto en la terminal.
+
+```
+fasterq-dump SRR3900953
+```
+
+Esto nos vas a devolver dos archivos formato '.fastq' pero uno con terminal '_1' perteneciente a la secuencia foward y '_2' a la secuencia reverse. 
+
+Despues para eliminar el archivo anterior, para evitar que confunda hay que hacerlo mediante este comando 
+
+````
+rm *.cache
+`````
+
+## 1.3 Descargar secuencias en conjunto 
+El numero de secuencias con el que voy a trabajar corresponde a 180 secuencias, las cuales para evitar descargar una por una se pueden descargar en conjunto mediante un archivo de texto simple '.txt', para esto se va poner todos los numeros de acceso en lista en un documento de texto simple, y lo vamos  a cargar a la terminal de la siguiente manera:
+
+`````
+nano num_secuencias_PRJNA778934.txt 
+prefetch --option-file /Users/Gaby/TESIS\ GABY/secuencias/sra/num_secuencias_PRJNA778934.txt 
+`````
+
+y ya nos va a descargar todas las secuencias en listadas, en la carepta de sra, todas estas estaran en formato '.sra', el cual habra que convertir como se habia descrito en el punto 1.2. 
+le ponemos el *.sra para que en automatico tome todas las secuencias para convertirlas en formato fastq, teniendo las secuencias _1 para las foward y las _2 para las reverse. 
+
+`````
+fasterq-dump *.sra 
+`````
+
+Ya por ultimo, vamos a borrar las secuencias con formato '.sra' para que no ocupen espacio y evitar confusiones.
+
+`````
+rm *.sra
+``````

@@ -29,3 +29,18 @@ taxa <- addSpecies(taxa, "~/tesis/01_Data/silva_species_assignment_v138.1.fa.gz"
 taxa.print <- taxa 
 rownames(taxa.print) <- NULL
 head(taxa.print) #llegamos a nivel de genero 
+
+########################################################################
+############################ TABLA BIOM ##################################
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("biomformat")
+
+library (biomformat)
+
+biomtable <- make_biom(taxa, sample_metadata = NULL, observation_metadata = NULL,
+          id = NULL, matrix_element_type = "int")
+
+save (biomtable, file ="table.biom")

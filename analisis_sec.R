@@ -88,6 +88,37 @@ save (seqtab, file ="seqtabs.RData")
 
 table (nchar(getSequences(seqtab))) #nspeccionar la distribucion del largo de las secuencias
 
+############################ DADA TO FASTA #########################
+
+#Generamos ya la tabla ASV pero esta no esta en el formato fasta para que lo podamos leer en PICRUSt2
+#por esto, tenemos que buscar una funcion que lo haga, la siguiente funcion pasa de los formatos de 
+#DADA2 a formato fasta, es una funcion que se encuentra en el paquete: "metagMisc" creada por vmikk.
+#este paquete lo podemos encontrar en GitHub (https://github.com/vmikk/metagMisc)
+
+
+dada_to_fasta <- function(seqtab, out = "DADA2.fasta", hash = "sha1", ...){
+  
+  seq_uniq <- dada2::getUniques(seqtab) 
+  
+  if(hash == "sha1"){ hh <- openssl::sha1(names(seq_uniq)) }
+  if(hash == "sha256"){ hh <- openssl::sha256(names(seq_uniq)) }
+  if(hash == "md5"){ hh <- openssl::md5(names(seq_uniq)) }
+  
+  seq_names <- paste(as.character(hh),
+                     ";size=",
+                     seq_uniq,
+                     ";",
+                     sep="")
+  
+  dada2::uniquesToFasta(seq_uniq, fout = out, ids = seq_names, ...)
+  
+  invisible(seq_names)
+}
+
+# La funcion ya quedo, y ya podemos utilizarla. El argumento es nuestra seqtab que creamos anteriormente 
+# el hash es el predeterminado y para el formato de salida colocamos el ".fna"
+dada_to_fasta(seqtab, out = "DADA2.fna", hash = "sha1")
+
 ##### eliminar quimeras ####
 seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus", multithread=TRUE, verbose = TRUE)
 

@@ -11,3 +11,8 @@ cd picrust2_out_pipeline
 #paso 2: colocar las lecturas del ASV en el arbol de referencia 
 place_seqs.py -s ../DADA2.fna -o out.tre -p 1 \
               --intermediate intermediate/place_seqs
+
+#paso 3: predicción del estado oculto de familia de genes 
+# Este paso es para ver que tan similar es cada ASV a una secuencia de referencia existente
+hsp.py -i 16S -t out.tre -o marker_predicted_and_nsti.tsv.gz -p 1 -n # secuencia 16S de referencia más cercana
+hsp.py -i EC -t out.tre -o EC_predicted.tsv.gz -p 1 # predice el numero de EC por asv 

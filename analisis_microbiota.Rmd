@@ -1,0 +1,351 @@
+---
+title: "MICROBIOTA MDD"
+author: "Gabriela Torres"
+date: "2023-06-07"
+output: html_document
+---
+## Descripcion de datos
+Análisis de microbiota intestinal de pacientes con Trastorno Depresivo Mayor (MDD) y Controles Saludables (CS) del trabajo de Dong et al., 2022. Los análisis previos se hicieron con DADA2 para obtener la tabla de ASV y generar la asignación taxonomica, después se pasó en un objeto "phyloseq", el que se usará para los análisis de diversidad de la microbiota. 
+
+### Objeto phyloseq
+```{r}
+load("~/tesis/01_Data/ps.RData")
+```
+ 
+## Preparacion
+
+### Paquetes a utilizar
+```{r}
+#CRAN
+library(tidyverse)
+library(plyr)
+library(grid)
+library(gridExtra)
+library(kableExtra)
+library(xtable)
+library(ggpubr)
+library(dada2)
+library(DECIPHER)
+library(phangorn)
+library(ggpubr)
+library(phyloseq)
+library(DESeq2)
+library(microbiome)
+library(philr)
+# library(btools) no disponible 
+library(fantaxtic)
+library(ampvis2)
+library(tsnemicrobiota)
+library(DT)
+library(viridis)
+library(pheatmap)
+library(ggnewscale)
+```
+
+## Análisis 
+
+### Control de calidad del análisis de 16S
+#### Prevalencia de los features taxonomicos
+```{r}
+# data frame que tiene la prevalencia de cada feature  
+prevdf = apply(X = otu_table(ps),
+               MARGIN = ifelse(taxa_are_rows(ps), yes = 1, no =2),
+               FUN = function(x){sum(x > 0)})
+
+# agregamos la taxonomía
+
+prevdf = data.frame(Prevalence = prevdf,
+                    TotalAbundance = taxa_sums(ps),
+                    tax_table(ps))
+
+plyr::ddply(prevdf, "Genus", function(df1){cbind(mean(df1$Prevalence),sum(df1$Prevalence))}) -> dfprev
+datatable(dfprev)
+```
+
+##### Por grupo
+###### MDD 
+```{r}
+p_mdd <- subset_samples(ps, groups == "MDD")
+prevdf_1 = apply(X = otu_table(p_mdd),
+               MARGIN = ifelse(taxa_are_rows(p_mdd), yes = 1, no =2),
+               FUN = function(x){sum(x > 0)})
+
+prevdf_1 = data.frame(Prevalence = prevdf_1,
+                    TotalAbundance = taxa_sums(p_mdd),
+                    tax_table(p_mdd))
+
+plyr::ddply(prevdf_1, "Genus", function(df1){cbind(mean(df1$Prevalence),sum(df1$Prevalence))}) -> dfprev_1
+datatable(dfprev_1)
+```
+
+###### CS
+```{r}
+p_cs <- subset_samples(ps, groups == "CS")
+prevdf_2 = apply(X = otu_table(p_cs),
+               MARGIN = ifelse(taxa_are_rows(p_cs), yes = 1, no =2),
+               FUN = function(x){sum(x > 0)})
+
+prevdf_2 = data.frame(Prevalence = prevdf_2,
+                    TotalAbundance = taxa_sums(p_cs),
+                    tax_table(p_cs))
+
+plyr::ddply(prevdf_2, "Genus", function(df1){cbind(mean(df1$Prevalence),sum(df1$Prevalence))}) -> dfprev_2
+datatable(dfprev_2)
+```
+
+La columna 1 representa la media de la cuenta de los reads para ese genéro y la columna 2 la suma. 
+Es riesgoso dejar los grupos taxonomicos con poca representación ya que pueden presentar falsos positivos, por lo que se recomienda filtrar. 
+
+### Filtrado 
+```{r}
+# Filtramos taxa de acuerdo a un umbral de 1e-5
+psd2 <- filter_taxa(ps, function(x) mean(x) > 1e-5, TRUE)
+
+# Remover taxa que no se observe más de X veces en al menos 10% de las muestras
+# psd3 <- filter_taxa(physeq_a, function(x) sum(x > 2) > (0.1*length(x)), TRUE) #MARCA ERROR 
+
+# Filtrar muestras con menos de 1000 reads
+psd4 <- prune_samples(sample_sums(psd2) > 500, psd2)
+
+psd4
+```
+
+### Otro filtrado
+Se filtra la taxa de baja prevalencia estableciendo un umbral y visualizando 
+
+#### Para género
+
+##### Grupo: MDD
+```{r}
+# Seleccionamos las taxa de interés
+prevdf1 = subset(prevdf_1, Genus %in% get_taxa_unique(psd4, "Genus"))
+ggplot(prevdf1, aes(TotalAbundance, Prevalence / nsamples(p_mdd),color=Genus)) +
+
+# Agregamos una línea para nuestro umbral
+  geom_hline(yintercept = 0.05, alpha = 0.5, linetype = 2) +  geom_point(size = 2, alpha = 0.7) +
+  scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
+  facet_wrap(~Genus) + theme(legend.position="none") + scale_fill_manual(values = viridis(8))
+ggsave("Plots/Prevalence_Genus_MDD.png", width = 30,
+  height = 19,dpi=600)
+```
+
+##### Grupo: CS
+```{r}
+# Seleccionamos las taxa de interés
+prevdf1 = subset(prevdf_2, Genus %in% get_taxa_unique(psd4, "Genus"))
+ggplot(prevdf1, aes(TotalAbundance, Prevalence / nsamples(p_cs),color=Genus)) +
+
+# Agregamos una línea para nuestro umbral
+  geom_hline(yintercept = 0.05, alpha = 0.5, linetype = 2) +  geom_point(size = 2, alpha = 0.7) +
+  scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
+  facet_wrap(~Genus) + theme(legend.position="none") + scale_fill_manual(values = viridis(8))
+ggsave("Plots/Prevalence_Genus_CS.png", width = 30,
+  height = 19,dpi=600)
+```
+
+#### Para familia
+
+##### Grupo: MDD
+```{r}
+# Seleccionamos las taxa de interés
+prevdf1 = subset(prevdf_1, Family %in% get_taxa_unique(psd4, "Family")) 
+ggplot(prevdf1, aes(TotalAbundance, Prevalence / nsamples(p_mdd),color=Family)) +
+
+# Agregamos una línea para nuestro umbral
+  geom_hline(yintercept = 0.05, alpha = 0.5, linetype = 2) +  geom_point(size = 2, alpha = 0.7) +
+  scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
+  facet_wrap(~Genus) + theme(legend.position="none") + scale_fill_manual(values = viridis(8))
+ggsave("Plots/Prevalence_Family_MDD.png", width = 30,
+  height = 19,dpi=600)
+```
+
+##### Grupo: CS
+```{r}
+# Seleccionamos las taxa de interés
+prevdf1 = subset(prevdf_2, Family %in% get_taxa_unique(psd4, "Family"))
+ggplot(prevdf1, aes(TotalAbundance, Prevalence / nsamples(p_cs),color=Family)) +
+
+# Agregamos una línea para nuestro umbral
+  geom_hline(yintercept = 0.05, alpha = 0.5, linetype = 2) +  geom_point(size = 2, alpha = 0.7) +
+  scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
+  facet_wrap(~Genus) + theme(legend.position="none") + scale_fill_manual(values = viridis(8))
+ggsave("Plots/Prevalence_Family_CS.png", width = 30,
+  height = 19,dpi=600)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Primero cargamos algunos scripts de manera remota
+scripts <- c("graphical_methods.R",
+             "tree_methods.R",
+             "plot_merged_trees.R",
+             "specificity_methods.R",
+             "ternary_plot.R",
+             "richness.R",
+             "edgePCA.R",
+             "copy_number_correction.R",
+             "import_frogs.R",
+             "prevalence.R",
+             "compute_niche.R")
+urls <- paste0("https://raw.githubusercontent.com/mahendra-mariadassou/phyloseq-extended/master/R/", scripts)
+
+for (url in urls) {
+  source(url)
+}
+```
+
+### Filtrado 
+```{r}
+# Definimos el umbral de prevalencia a un 5%
+prevalenceThreshold = 0.05
+```
+
+
+```{r}
+# Execute prevalence filter
+keepTaxa = rownames(prevdf)[(prevdf$Prevalence >= prevalenceThreshold)]
+psd5 <- prune_taxa(keepTaxa, psd4)
+psd5
+```
+
+## Riqueza (diversidad alfa)
+
+Es una curva de rarefacción para cada muestra, muestra la cantidad de riqueza en funcion al numero de reads
+
+```{r}
+#por grupos
+p1 <- ggrare(psd5, step = 100, color = "samples", label = "samples", se = TRUE)
+p1 <- p1 + facet_wrap(~groups)
+p1
+ggsave("Plots/Rarefactio_Genus.png", dpi=600,width = 21,
+  height = 13)
+```
+
+## Análisis de diversidad 
+
+```{r}
+plot_richness(psd5, color = "samples", x = "samples", measures = c("Observed", "Chao1", "Shannon","Simpson")) + geom_boxplot(aes(fill = samples), alpha=.7) + scale_color_manual(values = rainbow (122)) + scale_fill_manual(values = rainbow (122))
+ggsave("Plots/AlphaDiversities.png", height = 13, width=21,dpi=600)
+```
+
+
+### Contrastes: Por grupo y semanas 
+
+```{r}
+pseq <- subset_samples(psd5, groups == "MDD")
+plot_richness(pseq, color = "weeks", x = "samples", measures = c( "Chao1", "Shannon","Simpson")) + geom_boxplot(aes(fill = weeks), alpha=.7) + scale_color_manual(values = c("deeppink3", "darkturquoise")) + scale_fill_manual(values = c("deeppink3", "darkturquoise")) 
+ggsave("Plots/AlphaDiversities_MDD_weeks.png",height = 8, width=13,dpi=600)
+```
+
+```{r}
+pseq <- subset_samples(psd5, groups == "CS")
+plot_richness(pseq, color = "weeks", x = "samples", measures = c("Observed", "Chao1", "Shannon","Simpson")) + geom_boxplot(aes(fill = weeks), alpha=.7) + scale_color_manual(values =c("deeppink3")) + scale_fill_manual(values =("deeppink3"))
+ggsave("Plots/AlphaDiversities_CS_weeks.png",dpi=600)
+```
+
+### heatmap 
+```{r}
+# Riqueza
+tab <- richness(psd5)
+pheatmap(tab)
+
+# Uniformidad
+tab <- evenness(psd5, "all")
+pheatmap(tab)
+```
+
+
+```{r}
+# Generamos un objeto `phyloseq` sin taxa que sume 0 reads
+psd5.2 <- prune_taxa(taxa_sums(psd5) > 0, psd5)
+# Calculamos los índices de diversidad
+tab <- diversity (psd5.2, index = "all") ####
+# Y finalmente visualizamos la tabla de resultados
+datatable(tab)
+```
+
+```{r}
+psd5.2.meta <- meta(psd5.2)
+head(psd5.2.meta)
+psd5.2.meta$Shannon <- tab$diversity_shannon
+psd5.2.meta$InverseSimpson <- tab$diversity_inverse_simpson
+psd5.2.meta$Simpson <- tab$diversity_gini_simpson
+psd5.2.meta$Chao1 <- richness(psd5)$chao1
+datatable(psd5.2.meta)
+```
+
+```{r}
+
+spps<-c("0_Weeks","08_Weeks")
+# Creamos una lista de lo que queremos comparar
+pares.spps <- combn(seq_along(spps), 2, simplify = FALSE, FUN = function(i)spps[i])
+# Imprimimos en pantalla el resultado
+print(pares.spps)
+```
+
+### Chao1
+
+```{r}
+p1 <- ggviolin(psd5.2.meta, x = "groups", y = "Chao1",
+ add = "boxplot", fill = "weeks", palette = c("deeppink3", "darkturquoise"))  
+ggsave("Plots/Chao1_Comparisons.png",
+       height=13,width=21, dpi=600)
+
+p1 <- p1 + stat_compare_means(comparisons = pares.spps)
+ggsave("Plots/Chao1_Comparisons_Statistics.png",
+       height=13,width=21, dpi=600)
+```
+
+
+
+
+### Ordenas
+
+```{r}
+psd5.mds.bray <- ordinate(psd5, method = "MDS", distance = "bray")
+evals <- psd5.mds.bray$values$Eigenvalues
+pord2 <- plot_ordination(psd5, psd5.mds.bray, color = "samples") +
+  labs(col = "samples") +
+  coord_fixed(sqrt(evals[2] / evals[1]))
+ggsave("Plots/ordination_MDS_bray_samples.png",
+       height=13,width=21, dpi=600)
+ print(pord2)
+```
+```{r}
+psd5.mds.bray <- ordinate(psd5, method = "MDS", distance = "bray")
+evals <- psd5.mds.bray$values$Eigenvalues
+pord2 <- plot_ordination(psd5, psd5.mds.bray, color = "groups") +
+  labs(col = "groups") +
+  coord_fixed(sqrt(evals[2] / evals[1]))
+ggsave("Plots/ordination_MDS_bray_groups.png",
+       height=13,width=21, dpi=600)
+ print(pord2)
+```
+### Abundancias 
+
+```{r}
+# Necesitamos obtener las taxa más abundantes, en este caso el top 15
+top15 <- get_top_taxa(physeq_obj = psd5, n = 15, relative = T,
+                       discard_other = T, other_label = "Other")
+# Ya que no todas las taxa fueron clasificadas a nivel de especie, generamos etiquetas compuestas de distintos rangos taxonómicos para el gráfico
+top15 <- name_taxa(top15, label = "", species = F, other_label = "Other")
+# Finalmente graficamos
+fantaxtic_bar(ps.top222, color_by = "Genus", label_by = "Genus", facet_by = NULL, grid_by = NULL, other_color = "Grey") -> ptop222
+ptop222 
+```
+
+top222 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:222]
+ps.top222 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
+ps.top222 <- prune_taxa(top222, ps.top222)
+plot_bar(ps.top222, x="weeks", fill="Genus") + facet_wrap(~groups, scales="free_x")
+
+```{r}
+ps_tmp <- get_top_taxa(psd5 = ps.phyl, n = 10, relative = TRUE, discard_other = FALSE, other_label = "Other") 
+ps_tmp <- name_taxa(ps_tmp, label = "Unkown", species = T, other_label = "Other")
+
+phyl <- fantaxtic_bar(ps, color_by = "Genus", label_by = "Genus",facet_by = "groups", other_label = "Other", order_alg = "as.is")
+phyl + theme(legend.direction = "horizontal", legend.position = "bottom", )
+
+phyl
+```
+
+

@@ -298,7 +298,7 @@ ggsave("Plots/Chao1_Comparisons_Statistics.png",
 
 
 ### Ordenas
-
+#### Por muestras
 ```{r}
 psd5.mds.bray <- ordinate(psd5, method = "MDS", distance = "bray")
 evals <- psd5.mds.bray$values$Eigenvalues
@@ -309,16 +309,19 @@ ggsave("Plots/ordination_MDS_bray_samples.png",
        height=13,width=21, dpi=600)
  print(pord2)
 ```
+
+#### Por grupos
 ```{r}
-psd5.mds.bray <- ordinate(psd5, method = "MDS", distance = "bray")
-evals <- psd5.mds.bray$values$Eigenvalues
-pord2 <- plot_ordination(psd5, psd5.mds.bray, color = "groups") +
+psd4.mds.bray <- ordinate(psd4, method = "MDS", distance = "bray")
+evals3 <- psd4.mds.bray$values$Eigenvalues
+pord3 <- plot_ordination(psd4, psd4.mds.bray, color = "groups") +
   labs(col = "groups") +
   coord_fixed(sqrt(evals[2] / evals[1]))
 ggsave("Plots/ordination_MDS_bray_groups.png",
        height=13,width=21, dpi=600)
- print(pord2)
+ print(pord3)
 ```
+
 ### Abundancias 
 
 

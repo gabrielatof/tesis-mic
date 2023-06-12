@@ -321,30 +321,5 @@ ggsave("Plots/ordination_MDS_bray_groups.png",
 ```
 ### Abundancias 
 
-```{r}
-# Necesitamos obtener las taxa más abundantes, en este caso el top 15
-top15 <- get_top_taxa(physeq_obj = psd5, n = 15, relative = T,
-                       discard_other = T, other_label = "Other")
-# Ya que no todas las taxa fueron clasificadas a nivel de especie, generamos etiquetas compuestas de distintos rangos taxonómicos para el gráfico
-top15 <- name_taxa(top15, label = "", species = F, other_label = "Other")
-# Finalmente graficamos
-fantaxtic_bar(ps.top222, color_by = "Genus", label_by = "Genus", facet_by = NULL, grid_by = NULL, other_color = "Grey") -> ptop222
-ptop222 
-```
-
-top222 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:222]
-ps.top222 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
-ps.top222 <- prune_taxa(top222, ps.top222)
-plot_bar(ps.top222, x="weeks", fill="Genus") + facet_wrap(~groups, scales="free_x")
-
-```{r}
-ps_tmp <- get_top_taxa(psd5 = ps.phyl, n = 10, relative = TRUE, discard_other = FALSE, other_label = "Other") 
-ps_tmp <- name_taxa(ps_tmp, label = "Unkown", species = T, other_label = "Other")
-
-phyl <- fantaxtic_bar(ps, color_by = "Genus", label_by = "Genus",facet_by = "groups", other_label = "Other", order_alg = "as.is")
-phyl + theme(legend.direction = "horizontal", legend.position = "bottom", )
-
-phyl
-```
 
 

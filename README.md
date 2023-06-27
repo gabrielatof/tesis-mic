@@ -26,10 +26,12 @@ Con el paquete `phyloseq` se construyó un objeto, el cual va a ser utilizado pa
 4. **Análisis estadístico**
 
 5. **Análisis de perfiles funcionales con PICRUSt2**
+
 Este análisis se realizo con el sofware `PICRUSt2` que se ejecuta en Python. Se necesitan tres archivos de entrada que se generaron en los pasos anteriores: tabla asv, tabla biom y tabla de metadatos. El código se puede consular en [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
 
 
 ## CONTACTO 
+
 Este repositorio forma parte de la realización de una tesis de licenciatura por parte del **Laboratorio de Biología Cuantitativa y Sistemas Complejos** de la Licenciatura en Microbiología de la Universidad Autónoma de Querétaro. 
 
 **Tesista:** [Gabriela Montserrat Torres Fernández](https://github.com/gabrielatof) 

@@ -6,28 +6,19 @@ El objetivo de este trabajo es predecir los perfiles funcionales de la microbiot
 
 ## CÓDIGOS
 
-**1. Descargar base de datos**
+1. [sratoolkit.Rmd](https://github.com/gabrielatof/tesis/blob/main/sratoolkit.Rmd)
 
-Los archivos se descargaron con ayuda de la herramienta  `SRA Toolkit`. Para este paso consultar el código [sratoolkit.Rmd](https://github.com/gabrielatof/tesis/blob/main/sratoolkit.Rmd)
+2. [dada2_parte1_tabla_asv.R](https://github.com/gabrielatof/tesis/blob/main/dada2_parte1_tabla_asv.R)
 
-2. **Procesamiento de datos con DADA2 y construcción de tabla ASV**
+3. [dada2_parte2_taxonomia_y_tabla_biom.R](https://github.com/gabrielatof/tesis/blob/main/dada2_parte2_taxonomia_y_tabla_biom.R)
 
-Los archivos FASTQ se procesaron en R studio con el paquete `DADA2` para obtener la tabla de ASV. Este paso se puede consultar en [dada2_parte1_tabla_asv.R](https://github.com/gabrielatof/tesis/blob/main/dada2_parte1_tabla_asv.R)
+4. [phyloseq.R](https://github.com/gabrielatof/tesis/blob/main/phyloseq.R)
 
-- **Tabla BIOM**
+5. [analisis_microbioma.R](url)
 
-Después se proceso esta tabla y se le asigno la taxonomía y se generó la tabla BIOM. Consultar en [dada2_parte2_taxonomia_y_tabla_biom.R](https://github.com/gabrielatof/tesis/blob/main/dada2_parte2_taxonomia_y_tabla_biom.R)
+6. [análisis estadístico]()
 
-3. **Análisis del microbioma de pacientes con MDD y CS**
-
-Con el paquete `phyloseq` se construyó un objeto, el cual va a ser utilizado para todos los analisis del microbioma posteriores. Consultar en [phyloseq.R](https://github.com/gabrielatof/tesis/blob/main/phyloseq.R), para los análisis de diversidad alfa y beta así como análisis de abundancia consultar en [analisis_microbioma.R](url)
-
-
-4. **Análisis estadístico**
-
-5. **Análisis de perfiles funcionales con PICRUSt2**
-
-Este análisis se realizo con el sofware `PICRUSt2` que se ejecuta en Python. Se necesitan tres archivos de entrada que se generaron en los pasos anteriores: tabla asv, tabla biom y tabla de metadatos. El código se puede consular en [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
+7. [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
 
 
 ## CONTACTO 

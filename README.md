@@ -16,9 +16,7 @@ El objetivo de este trabajo es predecir los perfiles funcionales de la microbiot
 
 5. [analisis_microbioma.R](url)
 
-6. [análisis estadístico]()
-
-7. [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
+6. [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
 
 
 ## CONTACTO 

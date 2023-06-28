@@ -88,7 +88,6 @@ save (seqtab, file ="seqtabs.RData")
 
 table (nchar(getSequences(seqtab))) #nspeccionar la distribucion del largo de las secuencias
 
-#### aqui termina tutorial de DADA2
 
 ############################ DADA TO FASTA #########################
 
@@ -120,3 +119,35 @@ dada_to_fasta <- function(seqtab, out = "DADA2.fasta", hash = "sha1", ...){
 # La funcion ya quedo, y ya podemos utilizarla. El argumento es nuestra seqtab que creamos anteriormente 
 # el hash es el predeterminado y para el formato de salida colocamos el ".fna"
 dada_to_fasta(seqtab, out = "DADA2.fna", hash = "sha1")
+
+########################################################################################
+################################## ASIGNACION DE TAXONOMIA ##################################
+
+##### eliminar quimeras ####
+seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus", multithread=TRUE, verbose = TRUE)
+
+save (seqtab.nochim, file="seqtabnochim.RData")
+
+dim(seqtab.nochim) 
+
+sum(seqtab.nochim)/sum(seqtab) 
+
+##### verificar la calidad: Seguimiento de lecturas a través de la canalización ######
+
+getN <- function(x) sum(getUniques(x))
+track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim))
+colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "nonchim")
+rownames(track) <- sample.names
+head(track)
+
+########################## ASIGNAR TAXONOMIA #############################
+
+taxa <- assignTaxonomy(seqtab.nochim, "~/tesis/01_Data/silva_nr99_v138.1_train_set.fa.gz", multithread=TRUE)
+
+#dada2 implemento un paso extra para poder asignar a nivel de especie, descargando una base extra
+
+taxa <- addSpecies(taxa, "~/tesis/01_Data/silva_species_assignment_v138.1.fa.gz") #no ocrrio por Error: vector memory exhausted (limit reached?)
+
+taxa.print <- taxa 
+rownames(taxa.print) <- NULL
+head(taxa.print) #llegamos a nivel de genero 

@@ -127,3 +127,11 @@ plot_bar(ps.top222, x="weeks", fill="Genus") + facet_wrap(~groups, scales="free_
 
 #para familia
 plot_bar(ps.top222, x="weeks", fill="Family") + facet_wrap(~groups, scales="free_x")
+
+
+                                     
+########### TABLA BIOM ##########
+library(biomformat)
+otu <-t(as(otu_table(ps),"matrix"))
+otu_biom<-make_biom(data=otu)
+write_biom(otu_biom,"~/Desktop/otu_biom.biom")

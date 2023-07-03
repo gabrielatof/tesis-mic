@@ -28,3 +28,9 @@ zless -S EC_predicted.tsv.gz
 #para casa ASV.
 
 #paso 4: predicción de los metageomas 
+#Este paso ayuda a pronosticar las familias de genes ponderadas por la abundancia relativa de los ASV de la comunidad 
+#Por lo que esto se genera conectado la tabla BIOM de abundancias de ASV por muestras 
+metagenome_pipeline.py -i ../table.biom -m marker_predicted_and_nsti.tsv.gz -f EC_predicted.tsv.gz \
+                       -o EC_metagenome_out --strat_out
+                       
+#este paso va a generar varios arcihivos de salida, entre ellos: 

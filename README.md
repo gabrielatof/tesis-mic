@@ -12,7 +12,7 @@ El objetivo de este trabajo es predecir los perfiles funcionales de la microbiot
 
 3. [phyloseq.R](https://github.com/gabrielatof/tesis/blob/main/phyloseq.R)
 
-4. [analisis_microbioma.R](url)
+4. [analisis_microbioma.R](https://github.com/gabrielatof/tesis/blob/main/microbiome_analysis.Rmd)
 
 5. [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
 

@@ -303,34 +303,6 @@ La matriz de distancia resultante se usa en este caso con un método de ordinaci
 
 ### Análisis de Abundancias 
 
-#### Familia 
-
-```{r}
-# Necesitamos obtener las taxa más abundantes, en este caso el top 15
-top15 <- get_top_taxa(physeq_obj = psd5, n = 15, relative = T,
-                       discard_other = T, other_label = "Other")
-# Ya que no todas las taxa fueron clasificadas a nivel de especie, generamos etiquetas compuestas de distintos rangos taxonómicos para el gráfico
-top15 <- name_taxa(top15, label = "", species = F, other_label = "Other")
-# Finalmente graficamos
-fantaxtic_bar(top15, color_by = "Family", label_by = "Genus", facet_by = NULL, grid_by = NULL, other_color = "Grey") -> ptop15
-
-fantaxtic_bar(top, color_by = "Family", label_by = "Genus", facet_by = "groups", grid_by = NULL, other_color = "Grey") -> ptop15.2
-```
-
-```{r}
-#Para genero
-top <- names(sort(taxa_sums(psd5), decreasing=TRUE))[1:222]
-ps.top <- transform_sample_counts(psd5, function(OTU) OTU/sum(OTU))
-ps.top <- prune_taxa(top, ps.top)
-plot_bar(ps.top, x="weeks", fill="Genus") + facet_wrap(~groups, scales="free_x")
- 
-#para familia
-plot_bar(ps.top222, x="weeks", fill="Family") + facet_wrap(~groups, scales="free_x")
-```
-
-
-#### Género
-
 
 ### Abundancias difernciales 
 

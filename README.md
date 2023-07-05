@@ -16,6 +16,9 @@ El objetivo de este trabajo es predecir los perfiles funcionales de la microbiot
 
 5. [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
 
+## METODOLOGÍA
+
+![Diagrama](https://github.com/gabrielatof/tesis-mic/blob/main/diagrama%20tesis%20(1).png)
 
 ## CONTACTO 
 

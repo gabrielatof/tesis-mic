@@ -23,7 +23,7 @@ El objetivo de este trabajo es predecir los perfiles funcionales de la microbiot
 
 ## METODOLOGÍA
 
-![Diagrama](https://github.com/gabrielatof/tesis-mic/blob/main/diagrama%20tesis%20(1).png)
+![Diagrama](https://github.com/gabrielatof/tesis-mic/blob/main/diagrama%20tesis.png)
 
 ## CONTACTO 
 

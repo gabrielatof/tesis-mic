@@ -8,13 +8,18 @@ El objetivo de este trabajo es predecir los perfiles funcionales de la microbiot
 
 1. [sratoolkit.Rmd](https://github.com/gabrielatof/tesis/blob/main/sratoolkit.Rmd)
 
-2. [dada2.R](https://github.com/gabrielatof/tesis/blob/main/dada2_parte1_tabla_asv.R)
+2. [tabla de metadatos](https://docs.google.com/spreadsheets/d/1EDimsD27WBPn68wyx7j0EZHouHNaX7XzLdx-4fQm128/edit?usp=sharing)
 
-3. [phyloseq.R](https://github.com/gabrielatof/tesis/blob/main/phyloseq.R)
+3. [dada2.R](https://github.com/gabrielatof/tesis/blob/main/dada2_parte1_tabla_asv.R)
 
-4. [analisis_microbioma.R](https://github.com/gabrielatof/tesis/blob/main/analisis_microbioma.Rmd)
+4. [phyloseq.R](https://github.com/gabrielatof/tesis/blob/main/phyloseq.R)
 
-5. [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
+5. [tabla BIOM](https://github.com/gabrielatof/tesis/blob/main/phyloseq.R)
+
+6. [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
+
+7. [analisis_microbioma.R](https://github.com/gabrielatof/tesis/blob/main/analisis_microbioma.Rmd)
+
 
 ## METODOLOGÍA
 

@@ -18,6 +18,8 @@ El objetivo de este trabajo es predecir los perfiles funcionales de la microbiot
 
 6. [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
 
+Consultar la sección de [wiki](https://github.com/gabrielatof/tesis-mic/wiki/PICRUSt2) para el tutorial de instalación de PICRUSt2
+
 7. [analisis_microbioma.R](https://github.com/gabrielatof/tesis/blob/main/analisis_microbioma.Rmd)
 
 

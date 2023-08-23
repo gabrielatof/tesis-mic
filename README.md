@@ -22,7 +22,7 @@ Consultar la sección de [wiki](https://github.com/gabrielatof/tesis-mic/wiki/PI
 
 7. [analisis_microbioma.R](https://github.com/gabrielatof/tesis/blob/main/analisis_microbioma.Rmd)
 
-7.1. [analisis_microbioma_resumido](url) 
+  7.1. [analisis_microbioma_resumido.R](url) 
 
 
 

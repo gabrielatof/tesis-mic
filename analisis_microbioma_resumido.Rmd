@@ -181,6 +181,24 @@ plot_richness(psd4, color = "groups", x = "groups", measures = c("Observed", "Ch
 ggsave("Plots/diversidadalfa_psd4.png", dpi=600,width = 21,
   height = 13)
 ```
+```{r}
+### estimacion de P-value
+
+richness <- estimate_richness(psd4)
+head(richness)
+
+w1 = wilcox.test(richness$Observed ~ sample_data(psd4)$groups)
+w1
+
+w2 = wilcox.test(richness$Chao1 ~ sample_data(psd4)$groups)
+w2
+
+w3 = wilcox.test(richness$Shannon ~ sample_data(psd4)$groups)
+w3
+
+w4 = wilcox.test(richness$Simpson ~ sample_data(psd4)$groups)
+w4
+```
 
 ```{r}
 a_my_comparisons <- list( c("0_Weeks", "08_Weeks"))
@@ -191,4 +209,22 @@ plot_richness(psd4_mdd, color = "weeks", x = "weeks", measures = c("Observed", "
 ggsave("Plots/AlphaDiversities_mdd_means.png", height = 13, width=21,dpi=600)
 ```
 
+```{r}
+### estimacion de P-value
+
+richness1 <- estimate_richness(psd4_mdd)
+head(richness1)
+
+x1 = wilcox.test(richness1$Observed ~ sample_data(psd4_mdd)$groups)
+x1
+
+x2 = wilcox.test(richness1$Chao1 ~ sample_data(psd4_mdd)$groups)
+x2
+
+x3 = wilcox.test(richness1$Shannon ~ sample_data(psd4_mdd)$groups)
+x3
+
+x4 = wilcox.test(richness1$Simpson ~ sample_data(psd4_mdd)$groups)
+x4
+```
 

@@ -313,3 +313,181 @@ ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Phylum)) +
         axis.text.x.bottom = element_text(angle = -90))
 ```
 
+##### Familia 
+```{r}
+### familia por grupo: MDD y CS
+ps.rel = transform_sample_counts(psd4, function(x) x/sum(x)*100)
+# agglomerate taxa
+glom <- tax_glom(ps.rel, taxrank = 'Family', NArm = FALSE)
+ps.melt <- psmelt(glom)
+# change to character for easy-adjusted level
+ps.melt$Genus <- as.character(ps.melt$Family)
+
+ps.melt <- ps.melt %>%
+  group_by(groups, Family) %>%
+  mutate(median=median(Abundance))
+# select group mean > 2.5
+keep <- unique(ps.melt$Family[ps.melt$median > 20])
+ps.melt$Genus[!(ps.melt$Family %in% keep)] <- "< 20%"
+#to get the same rows together
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,groups,Family) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Family)) + 
+  geom_bar(stat = "identity", aes(fill=Family)) + 
+  labs(x="", y="%") +
+  facet_wrap(~groups, scales= "free_x", nrow=1) +
+  theme_classic() +
+  theme(legend.position = "right", 
+        strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+ggsave("Plots/abundancia_familia_grupos.png", dpi=600,width = 21,
+  height = 13)
+```
+
+```{r}
+### familia por semanas en MDD
+ps.rel = transform_sample_counts(psd4_mdd, function(x) x/sum(x)*100)
+# agglomerate taxa
+glom <- tax_glom(ps.rel, taxrank = 'Family', NArm = FALSE)
+ps.melt <- psmelt(glom)
+# change to character for easy-adjusted level
+ps.melt$Genus <- as.character(ps.melt$Family)
+
+ps.melt <- ps.melt %>%
+  group_by(weeks, Family) %>%
+  mutate(median=median(Abundance))
+# select group mean > 2.5
+keep <- unique(ps.melt$Family[ps.melt$median > 20])
+ps.melt$Genus[!(ps.melt$Family %in% keep)] <- "< 20%"
+#to get the same rows together
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,weeks,Family) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Family)) + 
+  geom_bar(stat = "identity", aes(fill=Family)) + 
+  labs(x="", y="%") +
+  facet_wrap(~weeks, scales= "free_x", nrow=1) +
+  theme_classic() +
+  theme(legend.position = "right", 
+        strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+ggsave("Plots/abundancia_familia_mdd.png", dpi=600,width = 21,
+  height = 13)
+```
+
+##### Genero
+
+```{r}
+### genero por grupo: MDD y CS
+ps.rel = transform_sample_counts(psd4, function(x) x/sum(x)*100)
+# agglomerate taxa
+glom <- tax_glom(ps.rel, taxrank = 'Genus', NArm = FALSE)
+ps.melt <- psmelt(glom)
+# change to character for easy-adjusted level
+ps.melt$Genus <- as.character(ps.melt$Genus)
+
+ps.melt <- ps.melt %>%
+  group_by(groups, Genus) %>%
+  mutate(median=median(Abundance))
+# select group mean > 0.2
+keep <- unique(ps.melt$Genus[ps.melt$median > 0.2])
+ps.melt$Genus[!(ps.melt$Genus %in% keep)] <- "< 0.2%"
+#to get the same rows together
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,groups,Genus) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Genus)) + 
+  geom_bar(stat = "identity", aes(fill=Genus)) + 
+  labs(x="", y="%") +
+  facet_wrap(~groups, scales= "free_x", nrow=1) +
+  theme_classic() + 
+  theme(legend.position = "right", 
+        strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+```
+
+
+```{r}
+### genero por semanas de tratamiendo de  MDD 
+ps.rel = transform_sample_counts(psd4_mdd, function(x) x/sum(x)*100)
+# agglomerate taxa
+glom <- tax_glom(ps.rel, taxrank = 'Genus', NArm = FALSE)
+ps.melt <- psmelt(glom)
+# change to character for easy-adjusted level
+ps.melt$Genus <- as.character(ps.melt$Genus)
+
+ps.melt <- ps.melt %>%
+  group_by(weeks, Genus) %>%
+  mutate(median=median(Abundance))
+# select group mean > 0.2
+keep <- unique(ps.melt$Genus[ps.melt$median > 0.2])
+ps.melt$Genus[!(ps.melt$Genus %in% keep)] <- "< 0.2%"
+#to get the same rows together
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,weeks,Genus) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Genus)) + 
+  geom_bar(stat = "identity", aes(fill=Genus)) + 
+  labs(x="", y="%") +
+  facet_wrap(~weeks, scales= "free_x", nrow=1) +
+  theme_classic() + 
+  theme(legend.position = "right", 
+        strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+```
+
+##### top 10
+```{r}
+## Top 10 familias 
+
+### CS
+phy2 <- psd4_cs %>% aggregate_taxa(level = "Family") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 193 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
+top10
+
+### MDD
+phy2 <- psd4_mdd %>% aggregate_taxa(level = "Family") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 193 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
+top10
+
+#### SEMANA 0
+p_mdd_0 <- subset_samples(psd4_mdd, weeks =="0_Weeks")
+phy2 <- p_mdd_0 %>% aggregate_taxa(level = "Family") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 193 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
+
+top10
+
+#### SEMANA 8
+p_mdd_9 <- subset_samples(psd4_mdd, weeks =="08_Weeks")
+phy2 <- p_mdd_9 %>% aggregate_taxa(level = "Family") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 193 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
+
+top10
+```
+
+#### Abundancias diferenciales

@@ -227,4 +227,89 @@ x3
 x4 = wilcox.test(richness1$Simpson ~ sample_data(psd4_mdd)$groups)
 x4
 ```
+### Diversidad beta 
+
+#### NMDS 
+
+```{r}
+ps.pr<- transform_sample_counts(psd4, function(otu) otu/sum(otu))
+ordin<- ordinate(ps.pr, method="NMDS", distance="bray")
+plot_ordination(ps.pr, ord, color="groups")
+```
+
+
+```{r}
+ordin$stress
+```
+
+```{r}
+dist = phyloseq::distance(ps.pr, method="bray", binary = TRUE)
+
+metada<- data.frame(sample_data(ps.pr))
+anosim(dist, metadata$groups)
+
+```
+
+#### Abundancias 
+
+##### Phylum 
+```{r}
+### phylum por grupo: MDD y CS
+ps.rel = transform_sample_counts(psd4, function(x) x/sum(x)*100)
+
+glom <- tax_glom(ps.rel, taxrank = 'Phylum', NArm = FALSE)
+
+ps.melt <- psmelt(glom)
+
+ps.melt$Phylum <- as.character(ps.melt$Phylum)
+
+ps.melt <- ps.melt %>%
+  group_by(groups, Phylum) %>%
+  mutate(median=median(Abundance))
+
+keep <- unique(ps.melt$Phylum[ps.melt$median > 1])
+ps.melt$Phylum[!(ps.melt$Phylum %in% keep)] <- "< 1%"
+
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,groups,Phylum) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Phylum)) + 
+  geom_bar(stat = "identity", aes(fill=Phylum)) + 
+  labs(x="", y="%") +
+  facet_wrap(~groups, scales= "free_x", nrow=1) +
+  theme_classic() + 
+  theme(strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+```
+
+```{r}
+### phylum por semanas de tratamiento en MDD: semana 0 y semana 8 
+ps.rel = transform_sample_counts(psd4_mdd, function(x) x/sum(x)*100)
+
+glom <- tax_glom(ps.rel, taxrank = 'Phylum', NArm = FALSE)
+
+ps.melt <- psmelt(glom)
+
+ps.melt$Phylum <- as.character(ps.melt$Phylum)
+
+ps.melt <- ps.melt %>%
+  group_by(weeks, Phylum) %>%
+  mutate(median=median(Abundance))
+
+keep <- unique(ps.melt$Phylum[ps.melt$median > 1])
+ps.melt$Phylum[!(ps.melt$Phylum %in% keep)] <- "< 1%"
+
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,weeks,Phylum) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Phylum)) + 
+  geom_bar(stat = "identity", aes(fill=Phylum)) + 
+  labs(x="", y="%") +
+  facet_wrap(~weeks, scales= "free_x", nrow=1) +
+  theme_classic() + 
+  theme(strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+```
 

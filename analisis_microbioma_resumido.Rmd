@@ -224,6 +224,4 @@ x4
 
 ### Diversidad beta 
 
-```
 
-#### Abundancias diferenciales

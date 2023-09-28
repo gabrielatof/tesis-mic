@@ -31,7 +31,7 @@ library(fantaxtic)
 library(DESeq2)
 ```
 
-# Análisis 
+# ANALISIS DE MICROBIOTA
 ## Control de calidad del análisis de 16S
 ### Prevalencia de los features taxonómicos
 ```{r}
@@ -49,38 +49,35 @@ prevdf = data.frame(Prevalence = prevdf,
 plyr::ddply(prevdf, "Genus", function(df1){cbind(mean(df1$Prevalence),sum(df1$Prevalence))}) -> dfprev
 datatable(dfprev)
 ```
-La columna 1 representa la media de la cuenta de los reads para ese genéro y la columna 2 la suma. 
-Es riesgoso dejar los grupos taxonomicos con poca representación ya que pueden presentar falsos positivos, por lo que se recomienda filtrar. 
 
 ```{r}
 # Filtramos taxa de acuerdo a un umbral de 1e-5
 psd2 <- filter_taxa(ps, function(x) mean(x) > 1e-5, TRUE)
-
-# Remover taxa que no se observe más de X veces en al menos 10% de las muestras
-# psd3 <- filter_taxa(physeq_a, function(x) sum(x > 2) > (0.1*length(x)), TRUE) #MARCA ERROR 
 
 # Filtrar muestras con menos de 500 reads
 psd4 <- prune_samples(sample_sums(psd2) > 500, psd2)
 
 psd4
 ```
+
 ```{r}
 # Seleccionamos las taxa de interés
-prevdf1 = subset(prevdf, Order %in% get_taxa_unique(psd4, "Order"))
+prevdf1= subset(prevdf, Order %in% get_taxa_unique(psd4, "Order"))
 ggplot(prevdf1, aes(TotalAbundance, Prevalence / nsamples(ps),color=Order)) +
 
 # Agregamos una línea para nuestro umbral
   geom_hline(yintercept = 0.05, alpha = 0.5, linetype = 2) +  geom_point(size = 2, alpha = 0.7) +
   scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
   facet_wrap(~Phylum) + theme(legend.position="none") + scale_fill_manual(values = viridis(8))
+ggsave("~/tesis/03_Output/Prevalencia_Genus.png", dpi=600,width = 21,
+  height = 13)
 ```
 
-#### Grupo MDD
-
 ```{r}
-p_mdd <- subset_samples(ps, groups == "MDD")
+### GRUPO MDD
+p_mdd<- subset_samples(ps, groups == "MDD")
 #
-prevdf_mdd = apply(X = otu_table(p_mdd),
+prevdf_mdd= apply(X = otu_table(p_mdd),
                MARGIN = ifelse(taxa_are_rows(p_mdd), yes = 1, no =2),
                FUN = function(x){sum(x > 0)})
 
@@ -89,7 +86,7 @@ prevdf_mdd = data.frame(Prevalence = prevdf_mdd,
                     tax_table(p_mdd))
 
 plyr::ddply(prevdf_mdd, "Family", function(df1){cbind(mean(df1$Prevalence),sum(df1$Prevalence))}) -> dfprev_mdd
-datatable(dfprev_mdd)
+datatable(dfprev_mdd_new)
 #
 psd2_mdd <- filter_taxa(p_mdd, function(x) mean(x) > 1e-5, TRUE)
 
@@ -100,19 +97,19 @@ ggplot(prevdf1_mdd, aes(TotalAbundance, Prevalence / nsamples(p_mdd),color=Genus
   geom_hline(yintercept = 0.01, alpha = 0.5, linetype = 2) +  geom_point(size = 2, alpha = 0.7) +
   scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
   facet_wrap(~Family) + theme(legend.position="none") + scale_fill_manual(values = viridis(8)) 
-ggsave("Plots/prevalencemdd.png", height = 13, width=21,dpi=600)
+ggsave("~/tesis/03_Output/Prevalencia_Family_MDD.png", dpi=600,width = 21,
+  height = 13)
 ```
 
-#### Grupo MDD
-
 ```{r}
+### Grupo CS
 p_cs <- subset_samples(ps, groups == "CS")
 #
-prevdf_cs = apply(X = otu_table(p_cs),
+prevdf_cs= apply(X = otu_table(p_cs),
                MARGIN = ifelse(taxa_are_rows(p_cs), yes = 1, no =2),
                FUN = function(x){sum(x > 0)})
 
-prevdf_cs = data.frame(Prevalence = prevdf_cs,
+prevdf_cs= data.frame(Prevalence = prevdf_cs,
                     TotalAbundance = taxa_sums(p_cs),
                     tax_table(p_cs))
 
@@ -121,14 +118,14 @@ datatable(dfprev_cs)
 #
 psd2_cs <- filter_taxa(p_cs, function(x) mean(x) > 1e-5, TRUE)
 
-psd4_cs <- prune_samples(sample_sums(psd2_cs) > 500, psd2_cs)
+psd4_cs<- prune_samples(sample_sums(psd2_cs) > 500, psd2_cs)
 #
 prevdf1_cs = subset(prevdf_cs, Family %in% get_taxa_unique(psd4_cs, "Family"))
 ggplot(prevdf1_cs, aes(TotalAbundance, Prevalence / nsamples(p_cs),color=Genus)) +
   geom_hline(yintercept = 0.01, alpha = 0.5, linetype = 2) +  geom_point(size = 2, alpha = 0.7) +
   scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
   facet_wrap(~Family) + theme(legend.position="none") + scale_fill_manual(values = viridis(8)) 
-ggsave("Plots/prevalencecs.png", height = 13, width=21,dpi=600)
+ggsave("~/tesis/03_Output/Prevalencia_Family_CS.png", height = 13, width=21,dpi=600)
 ```
 
 ### Curvas de rarefacción
@@ -153,50 +150,47 @@ for (url in urls) {
 }
 ```
 
-Es una curva de rarefacción para cada muestra, muestra la cantidad de riqueza en funcion al numero de reads
-
 ```{r}
 #por grupos
 p1 <- ggrare(psd4, step = 100, color = "groups", label = "samples", se = TRUE)
 p1 <- p1 + facet_wrap(~groups) + scale_color_manual(values = c("#EE7600", "#008B8B")) + scale_fill_manual(values = c("#EE7600", "#008B8B"))
 p1
-ggsave("Plots/Rarefactio_Groups.png", dpi=600,width = 21,
+ggsave("~/tesis/03_Output/Rarefactio_Groups.png", dpi=600,width = 21,
   height = 13)
 ```
-
-Estas curvas de rarefacción son para cada muestra, y nos ayudan a determinar si la profundidad de secuenciación fue suficiente o si se hubiera requerido mayor secuenciación. Este análisis permite averiguar si al secuenciar más se observarían más ASVs.
-
-muestran la cantidad de Taxa (riqueza o diversidad alfa) en función del tamaño muestreal o número de reads. Podemos observar que en este caso ya hemos secuenciado toda la diversidad de las muestras ya que hay plateau (meseta) y que la diversidad alfa no está subestimada
 
 ## Analisis de diversidad 
 
 ### Riqueza (diversidad alfa)
 
 ```{r}
+p_0week <- subset_samples(psd4, weeks == "0_Weeks") 
+
 a_my_comparisons <- list( c("CS", "MDD"))
 symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
 
-plot_richness(psd4, color = "groups", x = "groups", measures = c("Observed", "Chao1", "Shannon","Simpson")) + geom_boxplot(aes(fill = groups, alpha=.7)) + scale_color_manual(values = c("#EE7600", "#008B8B")) + scale_fill_manual(values = c("#EE7600", "#008B8B"))+
+plot_richness(p_0week, color = "groups", x = "groups", measures = c("Observed", "Chao1", "Shannon","Simpson")) + geom_boxplot(aes(fill = groups, alpha=.7)) + scale_color_manual(values = c("#EE7600", "#008B8B")) + scale_fill_manual(values = c("#EE7600", "#008B8B"))+
   stat_compare_means(method = "wilcox.test", comparisons = a_my_comparisons, label = "p.signif", symnum.args = symnum.args)
-ggsave("Plots/diversidadalfa_psd4.png", dpi=600,width = 21,
+ggsave("~/tesis/03_Output/diversidadalfa.png", dpi=600,width = 21,
   height = 13)
 ```
+
 ```{r}
 ### estimacion de P-value
 
-richness <- estimate_richness(psd4)
+richness <- estimate_richness(p_0week)
 head(richness)
 
-w1 = wilcox.test(richness$Observed ~ sample_data(psd4)$groups)
+w1 = wilcox.test(richness$Observed ~ sample_data(p_0week)$groups)
 w1
 
-w2 = wilcox.test(richness$Chao1 ~ sample_data(psd4)$groups)
+w2 = wilcox.test(richness$Chao1 ~ sample_data(p_0week)$groups)
 w2
 
-w3 = wilcox.test(richness$Shannon ~ sample_data(psd4)$groups)
+w3 = wilcox.test(richness$Shannon ~ sample_data(p_0week)$groups)
 w3
 
-w4 = wilcox.test(richness$Simpson ~ sample_data(psd4)$groups)
+w4 = wilcox.test(richness$Simpson ~ sample_data(p_0week)$groups)
 w4
 ```
 
@@ -206,288 +200,30 @@ symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("
 
 plot_richness(psd4_mdd, color = "weeks", x = "weeks", measures = c("Observed", "Chao1", "Shannon","Simpson")) + geom_boxplot(aes(fill = weeks, alpha=.7)) + scale_color_manual(values = c("#00868B", "#8B3A62")) + scale_fill_manual(values = c("#00868B", "#8B3A62"))+
   stat_compare_means(method = "wilcox.test", comparisons = a_my_comparisons, label = "p.signif", symnum.args = symnum.args)
-ggsave("Plots/AlphaDiversities_mdd_means.png", height = 13, width=21,dpi=600)
+ggsave("~/tesis/03_Output/diversidadalfa_mdd.png", height = 13, width=21,dpi=600)
 ```
 
 ```{r}
 ### estimacion de P-value
 
-richness1 <- estimate_richness(psd4_mdd)
-head(richness1)
+richness <- estimate_richness(psd4_mdd)
+head(richness)
 
-x1 = wilcox.test(richness1$Observed ~ sample_data(psd4_mdd)$groups)
+x1 = wilcox.test(richness$Observed ~ sample_data(psd4_mdd)$weeks)
 x1
 
-x2 = wilcox.test(richness1$Chao1 ~ sample_data(psd4_mdd)$groups)
+x2 = wilcox.test(richness$Chao1 ~ sample_data(psd4_mdd)$weeks)
 x2
 
-x3 = wilcox.test(richness1$Shannon ~ sample_data(psd4_mdd)$groups)
+x3 = wilcox.test(richness$Shannon ~ sample_data(psd4_mdd)$weeks)
 x3
 
-x4 = wilcox.test(richness1$Simpson ~ sample_data(psd4_mdd)$groups)
+x4 = wilcox.test(richness$Simpson ~ sample_data(psd4_mdd)$weeks)
 x4
 ```
+
 ### Diversidad beta 
 
-#### NMDS 
-
-```{r}
-ps.pr<- transform_sample_counts(psd4, function(otu) otu/sum(otu))
-ordin<- ordinate(ps.pr, method="NMDS", distance="bray")
-plot_ordination(ps.pr, ord, color="groups")
-```
-
-
-```{r}
-ordin$stress
-```
-
-```{r}
-dist = phyloseq::distance(ps.pr, method="bray", binary = TRUE)
-
-metada<- data.frame(sample_data(ps.pr))
-anosim(dist, metadata$groups)
-
-```
-
-#### Abundancias 
-
-##### Phylum 
-```{r}
-### phylum por grupo: MDD y CS
-ps.rel = transform_sample_counts(psd4, function(x) x/sum(x)*100)
-
-glom <- tax_glom(ps.rel, taxrank = 'Phylum', NArm = FALSE)
-
-ps.melt <- psmelt(glom)
-
-ps.melt$Phylum <- as.character(ps.melt$Phylum)
-
-ps.melt <- ps.melt %>%
-  group_by(groups, Phylum) %>%
-  mutate(median=median(Abundance))
-
-keep <- unique(ps.melt$Phylum[ps.melt$median > 1])
-ps.melt$Phylum[!(ps.melt$Phylum %in% keep)] <- "< 1%"
-
-ps.melt_sum <- ps.melt %>%
-  group_by(Sample,groups,Phylum) %>%
-  summarise(Abundance=sum(Abundance))
-
-ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Phylum)) + 
-  geom_bar(stat = "identity", aes(fill=Phylum)) + 
-  labs(x="", y="%") +
-  facet_wrap(~groups, scales= "free_x", nrow=1) +
-  theme_classic() + 
-  theme(strip.background = element_blank(), 
-        axis.text.x.bottom = element_text(angle = -90))
-```
-
-```{r}
-### phylum por semanas de tratamiento en MDD: semana 0 y semana 8 
-ps.rel = transform_sample_counts(psd4_mdd, function(x) x/sum(x)*100)
-
-glom <- tax_glom(ps.rel, taxrank = 'Phylum', NArm = FALSE)
-
-ps.melt <- psmelt(glom)
-
-ps.melt$Phylum <- as.character(ps.melt$Phylum)
-
-ps.melt <- ps.melt %>%
-  group_by(weeks, Phylum) %>%
-  mutate(median=median(Abundance))
-
-keep <- unique(ps.melt$Phylum[ps.melt$median > 1])
-ps.melt$Phylum[!(ps.melt$Phylum %in% keep)] <- "< 1%"
-
-ps.melt_sum <- ps.melt %>%
-  group_by(Sample,weeks,Phylum) %>%
-  summarise(Abundance=sum(Abundance))
-
-ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Phylum)) + 
-  geom_bar(stat = "identity", aes(fill=Phylum)) + 
-  labs(x="", y="%") +
-  facet_wrap(~weeks, scales= "free_x", nrow=1) +
-  theme_classic() + 
-  theme(strip.background = element_blank(), 
-        axis.text.x.bottom = element_text(angle = -90))
-```
-
-##### Familia 
-```{r}
-### familia por grupo: MDD y CS
-ps.rel = transform_sample_counts(psd4, function(x) x/sum(x)*100)
-# agglomerate taxa
-glom <- tax_glom(ps.rel, taxrank = 'Family', NArm = FALSE)
-ps.melt <- psmelt(glom)
-# change to character for easy-adjusted level
-ps.melt$Genus <- as.character(ps.melt$Family)
-
-ps.melt <- ps.melt %>%
-  group_by(groups, Family) %>%
-  mutate(median=median(Abundance))
-# select group mean > 2.5
-keep <- unique(ps.melt$Family[ps.melt$median > 20])
-ps.melt$Genus[!(ps.melt$Family %in% keep)] <- "< 20%"
-#to get the same rows together
-ps.melt_sum <- ps.melt %>%
-  group_by(Sample,groups,Family) %>%
-  summarise(Abundance=sum(Abundance))
-
-ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Family)) + 
-  geom_bar(stat = "identity", aes(fill=Family)) + 
-  labs(x="", y="%") +
-  facet_wrap(~groups, scales= "free_x", nrow=1) +
-  theme_classic() +
-  theme(legend.position = "right", 
-        strip.background = element_blank(), 
-        axis.text.x.bottom = element_text(angle = -90))
-ggsave("Plots/abundancia_familia_grupos.png", dpi=600,width = 21,
-  height = 13)
-```
-
-```{r}
-### familia por semanas en MDD
-ps.rel = transform_sample_counts(psd4_mdd, function(x) x/sum(x)*100)
-# agglomerate taxa
-glom <- tax_glom(ps.rel, taxrank = 'Family', NArm = FALSE)
-ps.melt <- psmelt(glom)
-# change to character for easy-adjusted level
-ps.melt$Genus <- as.character(ps.melt$Family)
-
-ps.melt <- ps.melt %>%
-  group_by(weeks, Family) %>%
-  mutate(median=median(Abundance))
-# select group mean > 2.5
-keep <- unique(ps.melt$Family[ps.melt$median > 20])
-ps.melt$Genus[!(ps.melt$Family %in% keep)] <- "< 20%"
-#to get the same rows together
-ps.melt_sum <- ps.melt %>%
-  group_by(Sample,weeks,Family) %>%
-  summarise(Abundance=sum(Abundance))
-
-ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Family)) + 
-  geom_bar(stat = "identity", aes(fill=Family)) + 
-  labs(x="", y="%") +
-  facet_wrap(~weeks, scales= "free_x", nrow=1) +
-  theme_classic() +
-  theme(legend.position = "right", 
-        strip.background = element_blank(), 
-        axis.text.x.bottom = element_text(angle = -90))
-ggsave("Plots/abundancia_familia_mdd.png", dpi=600,width = 21,
-  height = 13)
-```
-
-##### Genero
-
-```{r}
-### genero por grupo: MDD y CS
-ps.rel = transform_sample_counts(psd4, function(x) x/sum(x)*100)
-# agglomerate taxa
-glom <- tax_glom(ps.rel, taxrank = 'Genus', NArm = FALSE)
-ps.melt <- psmelt(glom)
-# change to character for easy-adjusted level
-ps.melt$Genus <- as.character(ps.melt$Genus)
-
-ps.melt <- ps.melt %>%
-  group_by(groups, Genus) %>%
-  mutate(median=median(Abundance))
-# select group mean > 0.2
-keep <- unique(ps.melt$Genus[ps.melt$median > 0.2])
-ps.melt$Genus[!(ps.melt$Genus %in% keep)] <- "< 0.2%"
-#to get the same rows together
-ps.melt_sum <- ps.melt %>%
-  group_by(Sample,groups,Genus) %>%
-  summarise(Abundance=sum(Abundance))
-
-ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Genus)) + 
-  geom_bar(stat = "identity", aes(fill=Genus)) + 
-  labs(x="", y="%") +
-  facet_wrap(~groups, scales= "free_x", nrow=1) +
-  theme_classic() + 
-  theme(legend.position = "right", 
-        strip.background = element_blank(), 
-        axis.text.x.bottom = element_text(angle = -90))
-```
-
-
-```{r}
-### genero por semanas de tratamiendo de  MDD 
-ps.rel = transform_sample_counts(psd4_mdd, function(x) x/sum(x)*100)
-# agglomerate taxa
-glom <- tax_glom(ps.rel, taxrank = 'Genus', NArm = FALSE)
-ps.melt <- psmelt(glom)
-# change to character for easy-adjusted level
-ps.melt$Genus <- as.character(ps.melt$Genus)
-
-ps.melt <- ps.melt %>%
-  group_by(weeks, Genus) %>%
-  mutate(median=median(Abundance))
-# select group mean > 0.2
-keep <- unique(ps.melt$Genus[ps.melt$median > 0.2])
-ps.melt$Genus[!(ps.melt$Genus %in% keep)] <- "< 0.2%"
-#to get the same rows together
-ps.melt_sum <- ps.melt %>%
-  group_by(Sample,weeks,Genus) %>%
-  summarise(Abundance=sum(Abundance))
-
-ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Genus)) + 
-  geom_bar(stat = "identity", aes(fill=Genus)) + 
-  labs(x="", y="%") +
-  facet_wrap(~weeks, scales= "free_x", nrow=1) +
-  theme_classic() + 
-  theme(legend.position = "right", 
-        strip.background = element_blank(), 
-        axis.text.x.bottom = element_text(angle = -90))
-```
-
-##### top 10
-```{r}
-## Top 10 familias 
-
-### CS
-phy2 <- psd4_cs %>% aggregate_taxa(level = "Family") %>%
-  
-          microbiome::transform(transform = "compositional")
-
-phy2 # hay 193 taxa porque es el numero de familias que tenemos
-
-top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
-top10
-
-### MDD
-phy2 <- psd4_mdd %>% aggregate_taxa(level = "Family") %>%
-  
-          microbiome::transform(transform = "compositional")
-
-phy2 # hay 193 taxa porque es el numero de familias que tenemos
-
-top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
-top10
-
-#### SEMANA 0
-p_mdd_0 <- subset_samples(psd4_mdd, weeks =="0_Weeks")
-phy2 <- p_mdd_0 %>% aggregate_taxa(level = "Family") %>%
-  
-          microbiome::transform(transform = "compositional")
-
-phy2 # hay 193 taxa porque es el numero de familias que tenemos
-
-top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
-
-top10
-
-#### SEMANA 8
-p_mdd_9 <- subset_samples(psd4_mdd, weeks =="08_Weeks")
-phy2 <- p_mdd_9 %>% aggregate_taxa(level = "Family") %>%
-  
-          microbiome::transform(transform = "compositional")
-
-phy2 # hay 193 taxa porque es el numero de familias que tenemos
-
-top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
-
-top10
 ```
 
 #### Abundancias diferenciales

@@ -1,0 +1,114 @@
+---
+title: "LEFSe Biomarcadores"
+author: "Gabriela Torres"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+# Paquetes a utilizar 
+library(tidyverse)
+library(phyloseq)
+library(microbiomeMarker)
+library (knitr)
+```
+
+```{r}
+# Cargar nuestro objeto phyloseq
+load ("~/tesis_gabriela/psd4.RData")
+psd4
+```
+
+```{r}
+# Hacer subset de nuestras muestras 
+p_0week <- subset_samples(psd4, weeks == "0_Week") # aqui tenemos unicamente los CS y pacientes con MDD en la semana 0 (antes del tratamiento)
+p_mdd <- subset_samples(psd4, groups == "MDD") # pacientes con MDD en la semana 0 y 8 (antes y despues del tratamiento)
+```
+
+# CS y MDD en semana 0
+
+```{r}
+p_0week #este phyloseq tiene secuencias y muestras
+
+table(sample_data(p_0week)$groups) # muestras de MDD y CS
+
+lef_out<-run_lefse(p_0week, group = "groups", norm = "CPM",
+                   
+                   kw_cutoff = 0.05, lda_cutoff = 2)
+
+lef_out #este incluye todos ls niveles taxonomicos 
+# tenemos microbiome markers
+```
+
+```{r}
+# Tabla de los marcadores de microbioma 
+dat<-marker_table(lef_out) %>% data.frame() %>% select(1:4)
+
+head(dat) 
+
+dat %>% filter(enrich_group=="MDD") %>% head()
+
+dat %>% kable(align = "c")
+```
+En esta ultima table nos muestra que tenemos columnas para los marcadores
+tenemos marcadores para MDD y para CS
+
+```{r}
+#Visualizar la tabla de marcadores en un histograma
+plot_ef_bar(lef_out) 
+```
+
+Observamos que los grupos taxonomicos que mas explican el grupo de MDD son:
+
+y los del CS son:
+
+```{r}
+#Visualizar la tabla de marcadores como un cladograma 
+
+# todos los rangos excepto genero
+plot_cladogram(lef_out, color = c("red","blue"), clade_label_level = 2)
+```
+
+# MDD en semana 0 y semana 8
+
+```{r}
+p_mdd  #este phyloseq tiene secuencias y muestras
+
+table(sample_data(p_mdd)$weeks) # muestras de MDD 
+
+lef_out<-run_lefse(p_mdd, group = "weeks", norm = "CPM",
+                   
+                   kw_cutoff = 0.05, lda_cutoff = 2)
+
+lef_out #este incluye todos ls niveles taxonomicos 
+# tenemos microbiome markers
+```
+
+```{r}
+# Tabla de los marcadores de microbioma 
+dat<-marker_table(lef_out) %>% data.frame() %>% select(1:4)
+
+head(dat) 
+
+dat %>% filter(enrich_group=="0_Weeks") %>% head()
+
+dat %>% kable(align = "c")
+```
+En esta ultima table nos muestra que tenemos columnas para los marcadores
+tenemos marcadores para MDD y para CS
+
+```{r}
+#Visualizar la tabla de marcadores en un histograma
+plot_ef_bar(lef_out) 
+```
+
+Observamos que los grupos taxonomicos que mas explican el grupo de MDD son:
+
+y los del CS son:
+
+```{r}
+#Visualizar la tabla de marcadores como un cladograma 
+
+# todos los rangos excepto genero
+plot_cladogram(lef_out, color = c("red","blue"), clade_label_level = 2)
+```

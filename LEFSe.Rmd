@@ -21,7 +21,7 @@ psd4
 
 ```{r}
 # Hacer subset de nuestras muestras 
-p_0week <- subset_samples(psd4, weeks == "0_Week") # aqui tenemos unicamente los CS y pacientes con MDD en la semana 0 (antes del tratamiento)
+p_0week <- subset_samples(psd4, weeks == "0_Weeks") # aqui tenemos unicamente los CS y pacientes con MDD en la semana 0 (antes del tratamiento)
 p_mdd <- subset_samples(psd4, groups == "MDD") # pacientes con MDD en la semana 0 y 8 (antes y despues del tratamiento)
 ```
 

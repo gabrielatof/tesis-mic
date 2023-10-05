@@ -223,5 +223,336 @@ x4
 ```
 
 ### Diversidad beta 
+#### NMDS
+NMDS de todas las muestras de MDD en comparación con los CS. 
 
+```{r}
+ps.rare<- transform_sample_counts(psd4, function(otu) otu/sum(otu))
+dist = phyloseq::distance(ps.rare, method="bray", binary = TRUE)
+ordination = ordinate(ps.rare, method="NMDS", distance="bray")
+plot_ordination(ps.rare, ordination, color="groups") +
+  geom_point(size=2)
+ggsave("~/tesis/03_Output/NMDS.png", height = 13, width=21,dpi=600)
+```
+
+```{r}
+dist.new = phyloseq::distance(ps.rare, method="bray", binary = TRUE)
+
+metada.new <- data.frame(sample_data(ps.rare))
+anosim(dist.new, metada.new$groups)
+ordination$stress
+```
+
+NMDS de unicamente las muestras de MDD comparando los generos de la microbiota por las semanas de tratamiento. 
+
+```{r}
+phy3 <- psd4_mdd%>% aggregate_taxa(level = "Genus")
+
+ps.rare<- transform_sample_counts(psd4_mdd, function(otu) otu/sum(otu))
+dist = phyloseq::distance(ps.rare, method="bray", binary = TRUE)
+ordination = ordinate(ps.rare, method="NMDS", distance="bray")
+plot_ordination(ps.rare, ordination, color="weeks") +
+  geom_point(size=2) +
+  stat_ellipse(aes(group=weeks))
+
+dist.new = phyloseq::distance(ps.rare, method="bray", binary = TRUE)
+
+metada.new <- data.frame(sample_data(ps.rare))
+anosim(dist.new, metada.new$weeks)
+```
+
+#### Abundancias 
+##### Phylum 
+```{r}
+### phylum por grupo: MDD y CS
+ps.rel = transform_sample_counts(p_0week, function(x) x/sum(x)*100)
+
+glom <- tax_glom(ps.rel, taxrank = 'Phylum', NArm = FALSE)
+
+ps.melt <- psmelt(glom)
+
+ps.melt$Phylum <- as.character(ps.melt$Phylum)
+
+ps.melt <- ps.melt %>%
+  group_by(groups, Phylum) %>%
+  mutate(median=median(Abundance))
+
+keep <- unique(ps.melt$Phylum[ps.melt$median > 1])
+ps.melt$Phylum[!(ps.melt$Phylum %in% keep)] <- "< 1%"
+
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,groups,Phylum) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Phylum)) + 
+  geom_bar(stat = "identity", aes(fill=Phylum)) + 
+  labs(x="", y="%") +
+  facet_wrap(~groups, scales= "free_x", nrow=1) +
+  theme_classic() + 
+  theme(strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+ggsave("~/tesis/03_Output/abundancia_phylum.png", dpi=600,width = 21,
+  height = 13)
+```
+
+```{r}
+### phylum por semanas de tratamiento en MDD: semana 0 y semana 8 
+ps.rel = transform_sample_counts(psd4_mdd, function(x) x/sum(x)*100)
+
+glom <- tax_glom(ps.rel, taxrank = 'Phylum', NArm = FALSE)
+
+ps.melt <- psmelt(glom)
+
+ps.melt$Phylum <- as.character(ps.melt$Phylum)
+
+ps.melt <- ps.melt %>%
+  group_by(weeks, Phylum) %>%
+  mutate(median=median(Abundance))
+
+keep <- unique(ps.melt$Phylum[ps.melt$median > 1])
+ps.melt$Phylum[!(ps.melt$Phylum %in% keep)] <- "< 1%"
+
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,weeks,Phylum) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Phylum)) + 
+  geom_bar(stat = "identity", aes(fill=Phylum)) + 
+  labs(x="", y="%") +
+  facet_wrap(~weeks, scales= "free_x", nrow=1) +
+  theme_classic() + 
+  theme(strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+ggsave("~/tesis/03_Output/abundancia_phylum_mdd.png", dpi=600,width = 21,
+  height = 13)
+```
+
+##### Familia 
+```{r}
+### familia por grupo: MDD y CS
+ps.rel = transform_sample_counts(p_0week, function(x) x/sum(x)*100)
+# agglomerate taxa
+glom <- tax_glom(ps.rel, taxrank = 'Family', NArm = FALSE)
+ps.melt <- psmelt(glom)
+# change to character for easy-adjusted level
+ps.melt$Genus <- as.character(ps.melt$Family)
+
+ps.melt <- ps.melt %>%
+  group_by(groups, Family) %>%
+  mutate(median=median(Abundance))
+# select group mean > 2.5
+keep <- unique(ps.melt$Family[ps.melt$median > 20])
+ps.melt$Genus[!(ps.melt$Family %in% keep)] <- "< 20%"
+#to get the same rows together
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,groups,Family) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Family)) + 
+  geom_bar(stat = "identity", aes(fill=Family)) + 
+  labs(x="", y="%") +
+  facet_wrap(~groups, scales= "free_x", nrow=1) +
+  theme_classic() +
+  theme(legend.position = "rigth", 
+        strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+ggsave("~/tesis/03_Output/abundancia_familia.png", dpi=600,width = 21,
+  height = 13)
+```
+
+```{r}
+### familia por semanas en MDD
+ps.rel = transform_sample_counts(psd4_mdd, function(x) x/sum(x)*100)
+# agglomerate taxa
+glom <- tax_glom(ps.rel, taxrank = 'Family', NArm = FALSE)
+ps.melt <- psmelt(glom)
+# change to character for easy-adjusted level
+ps.melt$Genus <- as.character(ps.melt$Family)
+
+ps.melt <- ps.melt %>%
+  group_by(weeks, Family) %>%
+  mutate(median=median(Abundance))
+# select group mean > 2.5
+keep <- unique(ps.melt$Family[ps.melt$median > 70])
+ps.melt$Genus[!(ps.melt$Family %in% keep)] <- "< 20%"
+#to get the same rows together
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,weeks,Family) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Family)) + 
+  geom_bar(stat = "identity", aes(fill=Family)) + 
+  labs(x="", y="%") +
+  facet_wrap(~weeks, scales= "free_x", nrow=1) +
+  theme_classic() +
+  theme(legend.position = "right", 
+        strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+ggsave("~/tesis/03_Output/abundancia_familia_mdd.png", dpi=600,width = 21,
+  height = 13)
+```
+
+##### Genero
+```{r}
+### genero por grupo: MDD y CS
+ps.rel = transform_sample_counts(p_0week, function(x) x/sum(x)*100)
+# agglomerate taxa
+glom <- tax_glom(ps.rel, taxrank = 'Genus', NArm = FALSE)
+ps.melt <- psmelt(glom)
+# change to character for easy-adjusted level
+ps.melt$Genus <- as.character(ps.melt$Genus)
+
+ps.melt <- ps.melt %>%
+  group_by(groups, Genus) %>%
+  mutate(median=median(Abundance))
+# select group mean > 0.2
+keep <- unique(ps.melt$Genus[ps.melt$median > 0.2])
+ps.melt$Genus[!(ps.melt$Genus %in% keep)] <- "< 0.2%"
+#to get the same rows together
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,groups,Genus) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Genus)) + 
+  geom_bar(stat = "identity", aes(fill=Genus)) + 
+  labs(x="", y="%") +
+  facet_wrap(~groups, scales= "free_x", nrow=1) +
+  theme_classic() + 
+  theme(legend.position = "right", 
+        strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90)) 
+ggsave("~/tesis/03_Output/abundancia_genero.png", dpi=600,width = 21,
+  height = 13)
+```
+
+
+```{r}
+### genero por semanas de tratamiendo de  MDD 
+ps.rel = transform_sample_counts(psd4_mdd, function(x) x/sum(x)*100)
+# agglomerate taxa
+glom <- tax_glom(ps.rel, taxrank = 'Genus', NArm = FALSE)
+ps.melt <- psmelt(glom)
+# change to character for easy-adjusted level
+ps.melt$Genus <- as.character(ps.melt$Genus)
+
+ps.melt <- ps.melt %>%
+  group_by(weeks, Genus) %>%
+  mutate(median=median(Abundance))
+# select group mean > 0.2
+keep <- unique(ps.melt$Genus[ps.melt$median > 0.2])
+ps.melt$Genus[!(ps.melt$Genus %in% keep)] <- "< 0.2%"
+#to get the same rows together
+ps.melt_sum <- ps.melt %>%
+  group_by(Sample,weeks,Genus) %>%
+  summarise(Abundance=sum(Abundance))
+
+ggplot(ps.melt_sum, aes(x = Sample, y = Abundance, fill = Genus)) + 
+  geom_bar(stat = "identity", aes(fill=Genus)) + 
+  labs(x="", y="%") +
+  facet_wrap(~weeks, scales= "free_x", nrow=1) +
+  theme_classic() + 
+  theme(legend.position = "right", 
+        strip.background = element_blank(), 
+        axis.text.x.bottom = element_text(angle = -90))
+ggsave("~/tesis/03_Output/abundancia_genero_mdd.png", dpi=600,width = 21,
+  height = 13)
+```
+
+##### top 10 familias
+```{r}
+## Top 10 familias 
+
+### CS
+phy2 <- psd4_cs %>% aggregate_taxa(level = "Family") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 76 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
+top10
+
+### MDD
+phy2 <- psd4_mdd %>% aggregate_taxa(level = "Family") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 187 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
+top10
+
+#### SEMANA 0
+p_mdd_0 <- subset_samples(psd4_mdd, weeks =="0_Weeks")
+phy2 <- p_mdd_0 %>% aggregate_taxa(level = "Family") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
+
+top10
+
+#### SEMANA 8
+p_mdd_9 <- subset_samples(psd4_mdd, weeks =="08_Weeks")
+phy2 <- p_mdd_9 %>% aggregate_taxa(level = "Family") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 193 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
+
+top10
+```
+
+##### top 10 generos
+```{r}
+## Top 10 generos
+
+### CS
+phy2 <- psd4_cs %>% aggregate_taxa(level = "Genus") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 203 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:10]
+top10
+
+### MDD
+phy2 <- psd4_mdd %>% aggregate_taxa(level = "Genus") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 193 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:11]
+top10
+
+#### SEMANA 0
+p_mdd_0 <- subset_samples(psd4_mdd, weeks =="0_Weeks")
+phy2 <- p_mdd_0 %>% aggregate_taxa(level = "Genus") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 193 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:11]
+
+top10
+
+#### SEMANA 8
+p_mdd_9 <- subset_samples(psd4_mdd, weeks =="08_Weeks")
+phy2 <- p_mdd_9 %>% aggregate_taxa(level = "Genus") %>%
+  
+          microbiome::transform(transform = "compositional")
+
+phy2 # hay 193 taxa porque es el numero de familias que tenemos
+
+top10 <- names(sort(taxa_sums(phy2), decreasing=TRUE))[1:11]
+
+top10
+```
 

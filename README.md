@@ -24,7 +24,7 @@ Consultar la sección de [wiki](https://github.com/gabrielatof/tesis-mic/wiki/PI
 
 ## METODOLOGÍA
 
-![Diagrama](https://github.com/gabrielatof/tesis-mic/blob/main/diagrama%20tesis.png)
+![Diagrama](https://github.com/gabrielatof/tesis-mic/blob/main/diagrama%20tesis%20(1).png)
 
 ## CONTACTO 
 

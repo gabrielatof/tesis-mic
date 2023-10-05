@@ -1,8 +1,6 @@
 # ANÁLISIS DE PERFILES FUNCIONALES DE LA MICROBIOTA INTESTINAL DE PACIENTES CON TRASTORNO DEPRESIVO MAYOR
 
-En este trabajo se incluyeron las secuencias del gen 16S del ARNr de los 63 pacientes hospitalizados y diagnosticados con Trastorno Depresivo Mayor (MDD), y los 30 controles saludables (CS) del trabajo publicado de [Dong et al. (2022)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9354493/). Los archivos SRA sin procesar se extrajeron de la NCBI [Short Read Archive](https://www.ncbi.nlm.nih.gov/sra), bajo el ID BioProject [PRJNA778934](https://www.ncbi.nlm.nih.gov/sra/?term=PRJNA778934). Se seleccionaron 122 archivos, excluyendo aquellos que no contenían información sobre el tipo de paciente y/o réplica de la muestra después del periodo de tratamiento.
-
-El objetivo de este trabajo es predecir los perfiles funcionales de la microbiota intestinal asociado a pacientes con MDD a partir de secuencias del gen 16S del ARNr mencionadas anteriormente, así como identificar la diversidad bacteriana presente en pacientes con MDD y en los CS.
+En este trabajo se incluyeron las secuencias del gen 16S del ARNr de los 63 pacientes hospitalizados y diagnosticados con Trastorno Depresivo Mayor (MDD), y los 30 controles saludables (CS) del trabajo publicado de [Dong et al. (2022)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9354493/). Los archivos SRA sin procesar se extrajeron de la NCBI [Short Read Archive](https://www.ncbi.nlm.nih.gov/sra), bajo el ID BioProject [PRJNA778934](https://www.ncbi.nlm.nih.gov/sra/?term=PRJNA778934). 
 
 ## CÓDIGOS
 

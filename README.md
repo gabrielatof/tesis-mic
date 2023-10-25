@@ -6,21 +6,15 @@ En este trabajo se incluyeron las secuencias del gen 16S del ARNr de los 63 paci
 
 1. [sratoolkit.Rmd](https://github.com/gabrielatof/tesis/blob/main/sratoolkit.Rmd)
 
-2. [tabla de metadatos](https://docs.google.com/spreadsheets/d/1EDimsD27WBPn68wyx7j0EZHouHNaX7XzLdx-4fQm128/edit?usp=sharing)
+2. [dada2.R](https://github.com/gabrielatof/tesis-mic/blob/main/dada2.R)
 
-3. [dada2.R](https://github.com/gabrielatof/tesis-mic/blob/main/dada2.R)
+3. [phyloseq.R](https://github.com/gabrielatof/tesis/blob/main/phyloseq.R)
 
-4. [phyloseq.R](https://github.com/gabrielatof/tesis/blob/main/phyloseq.R)
+4. [analisis_microbioma.R](https://github.com/gabrielatof/tesis-mic/blob/main/analisis_microbioma_resumido.Rmd)
 
-5. [tabla BIOM](https://github.com/gabrielatof/tesis/blob/main/phyloseq.R)
+5. [LEFSe.R](https://github.com/gabrielatof/tesis-mic/blob/main/LEFSe.Rmd)
 
-6. [picrust2.py](https://github.com/gabrielatof/tesis/blob/main/picrust2.py)
-
-Consultar la sección de [wiki](https://github.com/gabrielatof/tesis-mic/wiki/PICRUSt2) para el tutorial de instalación de PICRUSt2
-
-7. [analisis_microbioma.R](https://github.com/gabrielatof/tesis-mic/blob/main/analisis_microbioma_resumido.Rmd)
-
-8. [LEFSe.R](https://github.com/gabrielatof/tesis-mic/blob/main/LEFSe.Rmd)
+6. [microeco](https://github.com/gabrielatof/tesis-mic/blob/main/microeco.R)
 
 
 ## METODOLOGÍA 📝

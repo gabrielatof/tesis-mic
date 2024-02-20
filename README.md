@@ -12,11 +12,11 @@ En este trabajo se incluyeron las secuencias del gen 16S del ARNr de los 63 paci
 
 4. [analisis_microbioma.R](https://github.com/gabrielatof/tesis-mic/blob/main/analisis_microbioma_resumido.Rmd)
 
-5. [MicrobiotaProcess.R](https://github.com/gabrielatof/tesis-mic/blob/main/MicrobiotaProcess.R)
+4. [MicrobiotaProcess.R](https://github.com/gabrielatof/tesis-mic/blob/main/MicrobiotaProcess.R)
 
-6. [LEFSe.R](https://github.com/gabrielatof/tesis-mic/blob/main/LEFSe.Rmd)
+5. [LEFSe.R](https://github.com/gabrielatof/tesis-mic/blob/main/LEFSe.Rmd)
 
-7. [microeco](https://github.com/gabrielatof/tesis-mic/blob/main/microeco.R)
+6. [microeco](https://github.com/gabrielatof/tesis-mic/blob/main/microeco.R)
 
 
 ## METODOLOGÍA 📝
